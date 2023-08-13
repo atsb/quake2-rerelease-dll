@@ -436,7 +436,7 @@ MONSTERINFO_ATTACK(berserk_attack) (edict_t *self) -> void
 		berserk_melee(self);
 	// only jump if they are far enough away for it to make sense (otherwise
 	// it gets annoying to have them keep hopping over and over again)
-	else if (!self->spawnflags.has(SPAWNFLAG_BERSERK_NOJUMPING) && (self->timestamp < level.time && brandom()) && range_to(self, self->enemy) > 150.f)
+	else if (!self->spawnflags.has(SPAWNFLAG_BERSERK_NOJUMPING) && (self->timestamp < level.time && brandom()) && range_to(self, self->enemy) > 120.f)
 	{
 		M_SetAnimation(self, &berserk_move_attack_strike);
 		// don't do this for a while, otherwise we just keep doing it
@@ -602,8 +602,8 @@ void berserk_jump_now(edict_t *self)
 	vec3_t forward, up;
 
 	AngleVectors(self->s.angles, forward, nullptr, up);
-	self->velocity += (forward * 100);
-	self->velocity += (up * 300);
+	self->velocity += (forward * 20);
+	self->velocity += (up * 150);
 }
 
 void berserk_jump2_now(edict_t *self)
@@ -611,8 +611,8 @@ void berserk_jump2_now(edict_t *self)
 	vec3_t forward, up;
 
 	AngleVectors(self->s.angles, forward, nullptr, up);
-	self->velocity += (forward * 150);
-	self->velocity += (up * 400);
+	self->velocity += (forward * 80);
+	self->velocity += (up * 200);
 }
 
 void berserk_jump_wait_land(edict_t *self)
