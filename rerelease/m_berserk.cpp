@@ -337,33 +337,6 @@ void berserk_check_landing(edict_t *self)
 		self->monsterinfo.nextframe = FRAME_slam5;
 }
 
-mframe_t berserk_frames_attack_strike[] = {
-	{ ai_charge },
-	{ ai_charge, 0, berserk_jump_takeoff },
-	{ ai_move, 0, berserk_high_gravity },
-	{ ai_move, 0, berserk_high_gravity },
-	{ ai_move, 0, berserk_check_landing },
-	{ ai_move, 0, monster_footstep },
-	{ ai_move },
-	{ ai_move, 0, monster_footstep },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move },
-	{ ai_move, 0, monster_footstep }
-};
-MMOVE_T(berserk_move_attack_strike) = { FRAME_slam1, FRAME_slam23, berserk_frames_attack_strike, berserk_run };
-
 extern const mmove_t berserk_move_run_attack1;
 
 MONSTERINFO_MELEE(berserk_melee) (edict_t *self) -> void
@@ -434,14 +407,7 @@ MONSTERINFO_ATTACK(berserk_attack) (edict_t *self) -> void
 {
 	if (self->monsterinfo.melee_debounce_time <= level.time && (range_to(self, self->enemy) < MELEE_DISTANCE))
 		berserk_melee(self);
-	// only jump if they are far enough away for it to make sense (otherwise
-	// it gets annoying to have them keep hopping over and over again)
-	else if (!self->spawnflags.has(SPAWNFLAG_BERSERK_NOJUMPING) && (self->timestamp < level.time && brandom()) && range_to(self, self->enemy) > 150.f)
-	{
-		M_SetAnimation(self, &berserk_move_attack_strike);
-		// don't do this for a while, otherwise we just keep doing it
-		self->timestamp = level.time + 5_sec;
-	}
+
 	else if (self->monsterinfo.active_move == &berserk_move_run1 && (range_to(self, self->enemy) <= RANGE_NEAR))
 	{
 		M_SetAnimation(self, &berserk_move_run_attack1);
@@ -485,14 +451,6 @@ extern const mmove_t berserk_move_jump, berserk_move_jump2;
 
 PAIN(berserk_pain) (edict_t *self, edict_t *other, float kick, int damage, const mod_t &mod) -> void
 {
-	// if we're jumping, don't pain
-	if ((self->monsterinfo.active_move == &berserk_move_jump) ||
-		(self->monsterinfo.active_move == &berserk_move_jump2) ||
-		(self->monsterinfo.active_move == &berserk_move_attack_strike))
-	{
-		return;
-	}
-
 	if (level.time < self->pain_debounce_time)
 		return;
 
@@ -685,11 +643,8 @@ MONSTERINFO_BLOCKED(berserk_blocked) (edict_t *self, float dist) -> bool
 
 MONSTERINFO_SIDESTEP(berserk_sidestep) (edict_t *self) -> bool
 {
-	// if we're jumping or in long pain, don't dodge
-	if ((self->monsterinfo.active_move == &berserk_move_jump) ||
-		(self->monsterinfo.active_move == &berserk_move_jump2) ||
-		(self->monsterinfo.active_move == &berserk_move_attack_strike) ||
-		(self->monsterinfo.active_move == &berserk_move_pain2))
+	// if we're in long pain, don't dodge
+	if (self->monsterinfo.active_move == &berserk_move_pain2)
 		return false;
 
 	if (self->monsterinfo.active_move != &berserk_move_run1)
