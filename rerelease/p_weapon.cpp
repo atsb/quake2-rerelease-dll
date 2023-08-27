@@ -1775,7 +1775,7 @@ RAILGUN
 
 void weapon_railgun_fire(edict_t *ent)
 {
-	int damage = 100;
+	int damage = 150;
 	int kick = 200;
 
 	if (is_quad)
